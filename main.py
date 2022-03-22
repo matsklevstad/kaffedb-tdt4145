@@ -1,8 +1,10 @@
 import sqlite3
+import pandas as pd
 
 con = sqlite3.connect("kaffe.db")
 cursor = con.cursor()
-keegIntro = """
+
+logoIntro = """
     __ __      ________     ____  ____ 
    / //_/___ _/ __/ __/__  / __ \/ __ )
   / ,< / __ `/ /_/ /_/ _ \/ / / / __  |
@@ -21,13 +23,14 @@ menu = """\n---- Valgmuligheter i programmet ----\n
 6. Avslutt programmet \n"""
 
 def main():
-    print(keegIntro)
+   
+    print(logoIntro)
     print(intro)
     
     while True:
 
         print(menu)
-        tall = input("Velg en option, skriv inn et tall fra 1-6: ")
+        tall = input("Skriv inn et tall mellom 1 og 6 for å velge hva du vil gjøre: ")
 
         if(tall == "1"):
             print("Funksjon 1 kommer her \n")
@@ -52,7 +55,15 @@ def main():
             
         handleFollowUp()
 
+# input = 2
 def getListOverUsersWithMostTasted():
+    query = ("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as antallUnikeKafferSmakt
+                    FROM  Kaffesmaking NATURAL JOIN Bruker
+                    WHERE Smaksdato LIKE '%2022'
+                    GROUP BY Kaffesmaking.Epostadresse
+                    ORDER BY antallUnikeKafferSmakt DESC
+                    """)
+
     cursor.execute("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as antallUnikeKafferSmakt
                     FROM  Kaffesmaking NATURAL JOIN Bruker
                     WHERE Smaksdato LIKE '%2022'
@@ -60,9 +71,22 @@ def getListOverUsersWithMostTasted():
                     ORDER BY antallUnikeKafferSmakt DESC
                     """)
     row=cursor.fetchall()
-    print(row)
+    print("")
+    print("Resultatet ble: \n")
+    print(pd.read_sql_query(query, con))
+   # print(row)  # denne gir styggere output
 
+# input = 3 
 def getMostCoffePerPrice():
+    query = ("""SELECT KaffeNavn, avg(Poeng) as SnittPoeng, KiloprisNOK, BrenneriNavn
+                    FROM Kaffesmaking
+                    NATURAL JOIN Kaffe
+                    NATURAL JOIN KaffeBrentAvBrenneri
+                    NATURAL JOIN Kaffebrenneri
+                    GROUP BY kaffeID
+                    ORDER BY (Snittpoeng/KiloprisNOK) DESC
+                    """)
+    
     cursor.execute("""SELECT KaffeNavn, avg(Poeng) as SnittPoeng, KiloprisNOK, BrenneriNavn
                     FROM Kaffesmaking
                     NATURAL JOIN Kaffe
@@ -71,15 +95,41 @@ def getMostCoffePerPrice():
                     GROUP BY kaffeID
                     ORDER BY (Snittpoeng/KiloprisNOK) DESC
                     """)
+    print("")
+    print("Resultatet ble: \n")
+    print(pd.read_sql_query(query, con))
+
+    #Hjemmesnekra print:
+    """
     row=cursor.fetchall()
     i=1
     for entry in row:
         print(str(i) + ".", entry)
-        i=i + 1
+        i=i + 1 """
 
 
+# input = 4
 def getCoffeByKeyWord(keyword):
     keyword="%" + keyword + "%"
+    print(keyword)
+    query = ("""SELECT BrenneriNavn, KaffeNavn
+                        FROM Kaffe
+                            NATURAL JOIN KaffeBrentAvBrenneri
+                            NATURAL JOIN Kaffebrenneri
+                        WHERE Kaffe.KaffeBeskrivelse LIKE :keyword
+
+                        UNION
+
+                        SELECT BrenneriNavn, KaffeNavn
+                        FROM Kaffesmaking
+                            NATURAL JOIN Kaffe
+                            NATURAL JOIN KaffeBrentAvBrenneri
+                            NATURAL JOIN Kaffebrenneri
+                        WHERE Kaffesmaking.Smaksnotat LIKE :keyword
+
+                    """, keyword)
+
+
     cursor.execute("""SELECT BrenneriNavn, KaffeNavn
                         FROM Kaffe
                             NATURAL JOIN KaffeBrentAvBrenneri
@@ -95,27 +145,44 @@ def getCoffeByKeyWord(keyword):
                             NATURAL JOIN Kaffebrenneri
                         WHERE Kaffesmaking.Smaksnotat LIKE :keyword
 
-                    """, (keyword,))
+                    """, {"keyword": (keyword)})
+
 
     row=cursor.fetchall()
+
     if len(row) == 0:
         print("Det var ingen kaffer som stemte med søket ditt etter '" + keyword[1:-1] + "'")
     else:
-        print(row)
+        print("")
+        print("Resultatet ble: \n")
+        #print(pd.read_sql_query(query, con))
 
-def handleFollowUp():
-    choice = str(input("\nTast 'J' for å se menyen på nytt eller 'N' for å avslutte programmet: "))
-    while True:
-        if(choice == "J"):
-           return True
-        elif(choice == 'N'):
-            exitProgram()
-        else:
-            choice = str(input("Ugyldig input! Tast 'J' for å se menyen på nytt eller 'N' for å avslutte programmet: "))
+        print("BrenneriNavn".rjust(19) + "KaffeNavn".rjust(30))
+        i=0
+        for entry in row:
+            print(str(i) + entry[0].rjust(18) + " " + entry[1].rjust(29))
+            i=i + 1
+        #print(row)
 
+#input = 5
+# def ....
+
+
+# input = 6
 def exitProgram():
     print("\n---- Takk for nå! ----\n")
     con.close()
     quit()
+
+def handleFollowUp():
+    choice = str(input("\nTast 'J' for å se menyen på nytt eller 'N' for å avslutte programmet: "))
+    while True:
+        if(choice == "J" or choice == "j" ):
+           return True
+        elif(choice == 'N' or choice == "n"):
+            exitProgram()
+        else:
+            choice = str(input("Ugyldig input! Tast 'J' for å se menyen på nytt eller 'N' for å avslutte programmet: "))
+
 
 main()
