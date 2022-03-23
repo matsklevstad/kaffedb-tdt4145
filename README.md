@@ -1,5 +1,4 @@
-For å laste ned Pandas på MAC: 
-https://www.geeksforgeeks.org/how-to-install-python-pandas-on-macos/
+For å kjøre programmet må Pandas være installert: 
 
 1. Sjekk om pip3 og python3 er installert
 python3 --version
@@ -9,6 +8,3 @@ pip3 --version
 pip3 install --upgrade pip
 
 3. pip3 install pandas
-
-Hvordan bruke (ikke nødvendig å inkludere denne i besvarelsen): 
-https://stackoverflow.com/questions/37051516/printing-a-properly-formatted-sqlite-table-in-python

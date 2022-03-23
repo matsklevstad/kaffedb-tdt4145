@@ -17,12 +17,11 @@ intro = "Velkommen!"
 
 menu = """\n---- Valgmuligheter i programmet ----\n
 1. Skriv en kaffesmaking
-2. Vis liste over brukere som har smakt flest kaffer
+2. Vis liste over brukere som har smakt flest unike kaffer det siste året (2022)
 3. Vis liste over kaffe sortert etter hva som gir deg mest for pengene
 4. Skriv inn et nøkkelord og søk etter kaffer beskrevet med det nøkkelordet
 5. Vis kaffer fra Rwanda og Colombia som ikke er vaskede
 6. Avslutt programmet \n"""
-
 
 def main():
 
@@ -57,7 +56,6 @@ def main():
             print("Ugyldig input! Input må være et tall mellom 1 og 6.")
 
         handleFollowUp()
-
 
 # input = 1
 def handleUserTasting():
@@ -147,10 +145,9 @@ def handleUserTasting():
     else:
         print("Kaffesmakingen ble ikke lagret.")
 
-
 # input = 2
 def getListOverUsersWithMostTasted():
-    query = ("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as antallUnikeKafferSmakt
+    query = ("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as AntallUnikeKafferSmakt
                 FROM  Kaffesmaking NATURAL JOIN Bruker
                 WHERE Smaksdato LIKE '%2022'
                 GROUP BY Kaffesmaking.Epostadresse
@@ -203,10 +200,10 @@ def getCoffeByKeyWord(keyword):
         # som input fra brukeren. Måtte derfor bruker cursor.execute og lage en hjemmelagd "finere" tabell. Håper det er OK!
         print("")
         print("Resultatet ble: \n")
-        print("BrenneriNavn".rjust(19) + "KaffeNavn".rjust(30))
+        print("BrenneriNavn".rjust(29) + "KaffeNavn".rjust(40))
         i = 0
         for entry in row:
-            print(str(i) + entry[0].rjust(18) + " " + entry[1].rjust(29))
+            print(str(i) + entry[0].rjust(28) + " " + entry[1].rjust(39))
             i += 1
 
 #input = 5
@@ -238,7 +235,6 @@ def getUnwashedCoffeeFromRwandaAndColombia():
 
     print(pd.read_sql_query(query, con))
 
-
 # input = 6
 # Stenger tilkoblingen og avslutter programmet. 
 def exitProgram():
@@ -246,10 +242,10 @@ def exitProgram():
     con.close()
     quit()
 
-# Håndtere om brukeren vil sjekke ut de andre valgmuligheter
+# Håndtere om brukeren vil sjekke ut de andre valgmulighetene uten å måtte starte programmet på nytt
 def handleFollowUp():
     choice = str(input(
-        "\nTast 'J' for å se menyen på nytt eller 'N' for å avslutte programmet: "))
+        "\nTast 'J' eller 'j' for å se menyen på nytt eller 'N' eller 'n' for å avslutte programmet: "))
     while True:
         if(choice == "J" or choice == "j"):
             return True
