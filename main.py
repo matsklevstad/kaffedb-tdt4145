@@ -247,7 +247,9 @@ def getUnwashedCoffeeFromRwandaAndColombia():
         NATURAL JOIN Foredlingsmetode
     WHERE (Kaffegaard.Land LIKE "Colombia" OR Kaffegaard.Land LIKE "Rwanda") AND Foredlingsmetode.MetodeNavn LIKE "Vasket"
         """)
-
+        
+    print("")
+    print("Resultatet ble: \n")
     print(pd.read_sql_query(query, con))
 
 # input = 6
