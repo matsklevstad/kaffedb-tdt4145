@@ -17,7 +17,7 @@ intro = "Velkommen!"
 
 menu = """\n---- Valgmuligheter i programmet ----\n
 1. Skriv en kaffesmaking
-2. Vis liste over brukere som har smakt flest unike kaffer det siste året (2022)
+2. Vis liste over brukere som har smakt flest unike kaffer det siste året 
 3. Vis liste over kaffe sortert etter hva som gir deg mest for pengene
 4. Skriv inn et nøkkelord og søk etter kaffer beskrevet med det nøkkelordet
 5. Vis kaffer fra Rwanda og Colombia som ikke er vaskede
@@ -32,7 +32,8 @@ def main():
 
         print(menu)
 
-        choice = input("Skriv inn et tall mellom 1 og 6 for å velge hva du vil gjøre: ")
+        choice = input(
+            "Skriv inn et tall mellom 1 og 6 for å velge hva du vil gjøre: ")
 
         if(choice == "1"):
             handleUserTasting()
@@ -147,14 +148,28 @@ def handleUserTasting():
 
 # input = 2
 def getListOverUsersWithMostTasted():
-    query = ("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as AntallUnikeKafferSmakt
+    now = datetime.now()
+    date = now.strftime("%d.%m.%Y")
+    getYear = "%." + date[-4:]
+
+    cursor.execute("""SELECT Bruker.Fornavn, Bruker.Etternavn, count (distinct KaffeID) as AntallUnikeKafferSmakt
                 FROM  Kaffesmaking NATURAL JOIN Bruker
-                WHERE Smaksdato LIKE '%2022'
+                WHERE Smaksdato LIKE :getYear
                 GROUP BY Kaffesmaking.Epostadresse
-                ORDER BY antallUnikeKafferSmakt DESC""")
+                ORDER BY AntallUnikeKafferSmakt DESC""", {"getYear": (getYear)})
+
+    # Hadde problemer med at Pandas ikke likte SQL-spørringer hvor vi har variabler, i dette tilfellet "getYear"
+    # som input fra brukeren. Måtte derfor bruker cursor.execute og lage en hjemmelagd "finere" tabell. Håper det er OK!
+    row = cursor.fetchall()
     print("")
     print("Resultatet ble: \n")
-    print(pd.read_sql_query(query, con))
+    print("Fornavn".rjust(20) + "Etternavn".rjust(17) +
+          "AntallUnikeKafferSmakt".rjust(26))
+    i = 0
+    for entry in row:
+        print(str(i) + entry[0].rjust(19) + " " +
+              entry[1].rjust(16) + " " + str(entry[2]).rjust(25))
+        i += 1
 
 # input = 3
 def getMostCoffePerPrice():
@@ -196,7 +211,7 @@ def getCoffeByKeyWord(keyword):
         print("Det var ingen kaffer som stemte med søket ditt etter '" +
               keyword[1:-1] + "'")
     else:
-        # Hadde problemer med at Pandas ikke likte SQL-spørringer hvor vi har variabler, i dette tilfellet "keyword" 
+        # Hadde problemer med at Pandas ikke likte SQL-spørringer hvor vi har variabler, i dette tilfellet "keyword"
         # som input fra brukeren. Måtte derfor bruker cursor.execute og lage en hjemmelagd "finere" tabell. Håper det er OK!
         print("")
         print("Resultatet ble: \n")
@@ -236,7 +251,7 @@ def getUnwashedCoffeeFromRwandaAndColombia():
     print(pd.read_sql_query(query, con))
 
 # input = 6
-# Stenger tilkoblingen og avslutter programmet. 
+# Stenger tilkoblingen og avslutter programmet.
 def exitProgram():
     print("\n---- Takk for nå! ----\n")
     con.close()
