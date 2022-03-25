@@ -106,7 +106,7 @@ def handleUserTasting():
     validation = False
     while not validation:
         try:
-            points = int(input("Hvor mange poeng vil du gi til kaffen? "))
+            points = int(input("Hvor mange poeng (1-10) vil du gi til kaffen? "))
             while (points < 1 or points > 10):
                 points = int(
                     input("Smakspoeng kan ikke være mindre enn 1 eller større enn 10. Prøv igjen: "))
