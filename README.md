@@ -8,3 +8,6 @@ For å kjøre programmet må Pandas være installert:
  <code>pip3 install --upgrade pip  </code>
 
 3.  <code>pip3 install pandas </code>
+
+
+![alt text](image.png)
